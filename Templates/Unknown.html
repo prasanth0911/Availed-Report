@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Unknown</title>
+	<h1>Unknown data for the last month</h1>
+	<title>Report</title>
+	<link rel="stylesheet" type="text/css" href="C:/Users/Prashanth/Desktop/HTML/ProjectStyles.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script src ="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<style>
+		h1{
+			text-align : center;
+			color : purple;
+
+		}
+		thead{
+			font-weight : bold;
+			background-color: olive;
+		}
+	</style>
+	</head>
+<body>
+
+<script>
+function approve()
+{
+	var outageid = $("input[name='outageid']:checked").val()
+	if( typeof outageid == 'undefined')
+	{
+		alert("Please select any outageid ")
+	}
+	else
+	{
+		alert(outageid)
+}
+}
+</script>
+
+
+<table  id='main_table' class='table table-striped table-bordered table-sm' cellspacing='0' width='100%'>
+	<tbody>
+		<thead>
+			<tr>
+			<td>Outageid</td>
+			<td>Shutid</td>
+			<td>Element</td>
+			<td>Startdate</td>
+			<td>Enddate</td>
+			<td>Actions</td>
+			</tr>
+		</thead>
+		{% for i in items %}
+			{% if i.outageid == 0 %}
+		<tr>
+			<td>{{i.outageid}}</td>
+			<td>{{i.shutid}}</td>
+			<td>{{i.element}}</td>
+			<td>{{i.startdate}}</td>
+			<td>{{i.enddate}}</td>
+			<td><button onclick ="approve()">approve</button><button>Reject</button></td>
+		</tr>
+
+			<form action="">
+			{% for j in items %}
+				
+				{% if j.element == i.element and j.outageid != 0 %}
+				<tr>
+					<td>{{j.outageid}}</td>
+					<td>{{j.shutid}}</td>
+					<td>{{j.element}}</td>
+					<td>{{j.startdate}}</td>
+					<td>{{j.enddate}}</td>
+					<td><input type="radio" name='outageid' value={{j.outageid}}></td></br>
+				</tr>
+				{% endif %}
+			{% endfor %}
+			</form>
+			{% endif %}
+
+		{% endfor %}
+
+	</tbody>
+	</table>
+
+	</body>
+
+</html>
