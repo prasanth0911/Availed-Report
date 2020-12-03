@@ -3,7 +3,9 @@
     "",
     "\\calc",
     "\\calc\\migrations",
-    "\\sampleproject"
+    "\\sampleproject",
+    "\\Templates"
   ],
+  "SelectedNode": "\\sampleproject\\settings.py",
   "PreviewInSolutionExplorer": false
 }

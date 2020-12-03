@@ -1,105 +1,49 @@
 from django.shortcuts import render
-from .models import Unknown
-
-import psycopg2
-
-
+from .models import Unknown,Pwc
+from django.http import HttpResponse
+import psycopg2 
+from django.http import JsonResponse
+from datetime import date
 # Create your views here.
 
+#date picker
+def date(request):
+    return render(request,'Date.html')
 
-from django.http import HttpResponse
-
-def availed1(request):
-    html = """<!DOCTYPE html>
-<html>
-<head>
-<title>Project</title>
-<link rel="stylesheet" type="text/css" href="C:/Users/Prashanth/Desktop/HTML/ProjectStyles.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-<script src ="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-  
-  $(document).ready(function () {
-  $('#BasicTable').DataTable({
-    "pagingType": "simple_numbers" // "simple" option for 'Previous' and 'Next' buttons only
-  });
-  $('.dataTables_length').addClass('bs-select');
-});
-
-</script>
-<script type="text/javascript">
-  $(document).ready(function() {
-  $('[data-toggle="toggle"]').change(function(){
-    $(this).parents().next('.hide').toggle();
-  });
-});
-</script>
-</head>
-
-<body>
-<div>
-<h1>Generate Report for Availed and Non Availed Shutdown Requests</h1>
-</div>
-<script type="text/javascript">
-
-var Intial_list=[[1234,5678,"Element1","19-08-2020","25-09-2020",1],[1235,5679,"Element2","19-08-2020","25-09-2020",1],
-[null,5680,"Element3","19-08-2020","25-09-2020",0],[1236,5678,"Element4","19-08-2020","25-09-2020",1],
-[1237,5678,"Element1","19-08-2020","25-09-2020",1],[null,5683,"Element2","19-08-2020","25-09-2020",0],
-[1234,5678,"Element1","19-08-2020","25-09-2020",1],[1235,5679,"Element2","19-08-2020","25-09-2020",1],
-[null,5680,"Element3","19-08-2020","25-09-2020",0],[1236,5678,"Element4","19-08-2020","25-09-2020",1],
-[1237,5678,"Element1","19-08-2020","25-09-2020",1],[null,5683,"Element2","19-08-2020","25-09-2020",0],
-[1234,5678,"Element1","19-08-2020","25-09-2020",1],[1235,5679,"Element2","19-08-2020","25-09-2020",1],
-[null,5680,"Element3","19-08-2020","25-09-2020",0],[1236,5678,"Element4","19-08-2020","25-09-2020",1],
-[1237,5678,"Element1","19-08-2020","25-09-2020",1],[null,5683,"Element2","19-08-2020","25-09-2020",0],
-[1234,5678,"Element1","19-08-2020","25-09-2020",1],[1235,5679,"Element2","19-08-2020","25-09-2020",1],
-[null,5680,"Element3","19-08-2020","25-09-2020",0],[1236,5678,"Element4","19-08-2020","25-09-2020",1],
-[1237,5678,"Element1","19-08-2020","25-09-2020",1],[null,5683,"Element2","19-08-2020","25-09-2020",0],
-[1234,5678,"Element1","19-08-2020","25-09-2020",1],[1235,5679,"Element2","19-08-2020","25-09-2020",1],
-[null,5680,"Element3","19-08-2020","25-09-2020",0],[1236,5678,"Element4","19-08-2020","25-09-2020",1],
-[1237,5678,"Element1","19-08-2020","25-09-2020",1],[null,5683,"Element2","19-08-2020","25-09-2020",0],
-[1234,5678,"Element1","19-08-2020","25-09-2020",1],[1235,5679,"Element2","19-08-2020","25-09-2020",1],
-[null,5680,"Element3","19-08-2020","25-09-2020",0],[1236,5678,"Element4","19-08-2020","25-09-2020",1],
-[1237,5678,"Element1","19-08-2020","25-09-2020",1],[null,5683,"Element2","19-08-2020","25-09-2020",0]]
-
-
-
-
-
-<div id="Availed"><h2 class="Avld">
-<button onclick="approve(1)">Availed Report</button>
-</h2></div>
-<div id="Unknown"><h2 class="Unknwn">
-<button onclick="approve(0)">Unknown Report</button>
-</h2></div>
-<div id="my_table"></div>
-</body>
-</html>
-"""
-    return HttpResponse(html)
-
-
+#display total shutdown data in home page
 def home(request):
-    return HttpResponse("This is home page")
+    month=request.GET.get('month')
+    year=request.GET.get('year')
+    data=Unknown.objects.raw('select * from calc_pwc where extract(year from startdate)=%s and extract(month from startdate)=%s order by startdate asc',[year,month])
+    return render(request,'Home.html', {'items' : data,'month' : month, 'year' : year})
 
-
-
-def example(request):
-    data=Unknown.objects.raw('select * from calc_unknown')
-    return render(request, 'example.html', {'items' : data})
-
-
+#Availed shutdowns
 def availed(request):
+    month=request.GET.get('month')
+    year=request.GET.get('year')
+    for i in Unknown.objects.raw('select * from calc_unknown  where shutid !=0 and extract(year from startdate)=%s and extract(month from startdate)=%s',[year,month]):
+        Pwc.objects.filter(shutid = i.shutid).update(availed=True,outageid=i.outageid)
+    data=Pwc.objects.raw('select * from calc_pwc where availed=True and extract(year from startdate)=%s and extract(month from startdate)=%s',[year,month])
+    return render(request,'Availed.html', {'items':data, 'month' : month, 'year' : year})
 
-    data=Unknown.objects.raw('select * from calc_unknown where outageid!=0  order by startdate asc')
-    return render(request,'Availed.html',{'items':data})
-
+#Unknown shutdowns
 def  unknown(request):
-    data=Unknown.objects.raw('select * from calc_unknown order by startdate desc')
-    return render(request,'Unknown.html',{'items':data})
+    option=request.GET.get('option')
+    x=request.GET.get('shutid')
+    y=request.GET.get('outageid')
+    month=request.GET.get('month')
+    year=request.GET.get('year')
+    if (option == "accept"):
+        Pwc.objects.filter(shutid=x).update(outageid=y, availed=True)
+        Unknown.objects.filter(outageid=y).update(shutid=x)
+    if (option == "reject"):
+        Pwc.objects.filter(shutid=x).update(availed=False)
+    data1=Pwc.objects.raw('select * from calc_pwc where availed is null and extract(year from startdate)=%s and extract(month from startdate)=%s order by startdate asc',[year,month])
+    data2=Unknown.objects.raw('select * from calc_unknown where shutid=0 and extract(year from startdate)=%s and extract(month from startdate)=%s',[year, month])
+    return render(request,'Unknown.html', {'items1':data1,'items2':data2, 'month' : month, 'year' : year})
+
+
+
 
 
 

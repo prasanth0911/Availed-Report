@@ -18,10 +18,10 @@ from django.urls import path, include
 from calc import views
 
 urlpatterns = [
-    path('',views.home),
+    path('',views.date),
     path('admin/', admin.site.urls),
-    path('availed1/',views.availed1),
-    path('example/',views.example),
-    path('example/availed/',views.availed),
-    path('example/unknown/',views.unknown),
+    path('home/',views.home),
+    path('home/availed/',views.availed),
+    path('home/unknown/',views.unknown),
+  
 ]
